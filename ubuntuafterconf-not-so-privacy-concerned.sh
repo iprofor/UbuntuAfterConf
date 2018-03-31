@@ -12,7 +12,12 @@
 # RKHunter https://www.digitalocean.com/community/tutorials/how-to-use-rkhunter-to-guard-against-rootkits-on-an-ubuntu-vps
 
 
-# Run as root
+# Checking if the script is running as root
+if [[ "$EUID" -ne 0 ]]; then
+  echo "Sorry, you need to run this as root"
+  exit 1
+fi
+
 
 # Clear all previous bash variables
 # exec bash;
@@ -26,8 +31,9 @@ hm="/home"
 usr="crt"
 ipinf=(ipinfo.io/ip);
 bckp=(bckp);
-dns_provider=(dnscrypt.eu-nl);
-hstnm=(bear.hostname.local);
+dns_provider=(dnscrypt.eu-dk);
+hstnm=(Macmini);
+tmpth=/tmp/inst_session;
 dn=/dev/null 2>&1
 den1=(/dev/null);
 rlog=(/root/installation.log);
@@ -204,22 +210,76 @@ if [[ ! $? -eq 0 ]]; then
     echo -e "Repository server: \e[1m\e[34marchive.ubuntu.com (UK)\e[0m" && blnk_echo;
 
     echo "
-    deb [arch=amd64] $apturl xenial main restricted
-    deb [arch=amd64] $apturl xenial-updates main restricted
+    # deb cdrom:[Ubuntu 16.04.3 LTS _Xenial Xerus_ - Release amd64 (20170801)]/ xenial main restricted
 
-    deb [arch=amd64] $apturl xenial universe
-    deb [arch=amd64] $apturl xenial-updates universe
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of the distribution.
+deb http://archive.ubuntu.com/ubuntu/ xenial main restricted
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial main restricted
 
-    deb [arch=amd64] $apturl xenial multiverse
-    deb [arch=amd64] $apturl xenial-updates multiverse
+## Major bug fix updates produced after the final release of the
+## distribution.
+deb http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial-updates main restricted
 
-    deb [arch=amd64] $apturl xenial-backports main restricted universe multiverse
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
+## team. Also, please note that software in universe WILL NOT receive any
+## review or updates from the Ubuntu security team.
+deb http://archive.ubuntu.com/ubuntu/ xenial universe
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial universe
+deb http://archive.ubuntu.com/ubuntu/ xenial-updates universe
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial-updates universe
 
-    deb [arch=amd64] $apturl xenial-security main restricted
-    deb [arch=amd64] $apturl xenial-security universe
-    deb [arch=amd64] $apturl xenial-security multiverse
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
+## team, and may not be under a free licence. Please satisfy yourself as to
+## your rights to use the software. Also, please note that software in
+## multiverse WILL NOT receive any review or updates from the Ubuntu
+## security team.
+deb http://archive.ubuntu.com/ubuntu/ xenial multiverse
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial multiverse
+deb http://archive.ubuntu.com/ubuntu/ xenial-updates multiverse
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial-updates multiverse
 
-    deb [arch=amd64] $apturl2 xenial partner" > $srclst;
+## N.B. software from this repository may not have been tested as
+## extensively as that contained in the main release, although it includes
+## newer versions of some applications which may provide useful features.
+## Also, please note that software in backports WILL NOT receive any review
+## or updates from the Ubuntu security team.
+deb http://archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
+# deb-src http://archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
+
+## Uncomment the following two lines to add software from Canonical's
+## 'partner' repository.
+## This software is not part of Ubuntu, but is offered by Canonical and the
+## respective vendors as a service to Ubuntu users.
+# deb http://archive.canonical.com/ubuntu xenial partner
+# deb-src http://archive.canonical.com/ubuntu xenial partner
+
+deb http://security.ubuntu.com/ubuntu xenial-security main restricted
+# deb-src http://security.ubuntu.com/ubuntu xenial-security main restricted
+deb http://security.ubuntu.com/ubuntu xenial-security universe
+# deb-src http://security.ubuntu.com/ubuntu xenial-security universe
+deb http://security.ubuntu.com/ubuntu xenial-security multiverse
+# deb-src http://security.ubuntu.com/ubuntu xenial-security multiverse
+" > $srclst;
+
+    # echo "
+    # deb [arch=amd64] $apturl xenial main restricted
+    # deb [arch=amd64] $apturl xenial-updates main restricted
+    #
+    # deb [arch=amd64] $apturl xenial universe
+    # deb [arch=amd64] $apturl xenial-updates universe
+    #
+    # deb [arch=amd64] $apturl xenial multiverse
+    # deb [arch=amd64] $apturl xenial-updates multiverse
+    #
+    # deb [arch=amd64] $apturl xenial-backports main restricted universe multiverse
+    #
+    # deb [arch=amd64] $apturl xenial-security main restricted
+    # deb [arch=amd64] $apturl xenial-security universe
+    # deb [arch=amd64] $apturl xenial-security multiverse
+    #
+    # deb [arch=amd64] $apturl2 xenial partner" > $srclst;
 
       # UFW
       ufwc=(/etc/ufw/ufw.conf);
@@ -294,7 +354,7 @@ if [[ ! $? -eq 0 ]]; then
           echo -e "\e[1m\e[34m$a2\e[0m";
         done
 
-        ufw reload > $dn >> $rlog && echo -e "UFW is \e[1m\e[32mRELOADED\e[0m" && blnk_echo;
+        ufw -f reload > $dn >> $rlog && echo -e "UFW is \e[1m\e[32mRELOADED\e[0m" && blnk_echo;
 
         # Checks if the firewall is running
         if ufw status verbose | grep -qw "active"; then
@@ -306,12 +366,12 @@ if [[ ! $? -eq 0 ]]; then
 
           # For some reason after enabling the firewall there is no way to make outgoing connections. The workaround is to disable the firewall, make an outgoing connection and the reenable it.
           ufw disable > $dn >> $rlog && wget -q --tries=10 --timeout=20 --spider http://google.com && ufw enable > $dn >> $rlog;
-          # && ufw reload;
+          # && ufw -f reload;
         	#/etc/init.d/ufw stop;
         	#/etc/init.d/ufw start;
         	#sleep 60;
           # Waiting several seconds for the changes to be applied
-          #sleep 10;
+          sleep 20;
 
           # Checking if there is any internet connection
           #if [[ $(curl -s ipinfo.io/ip) ]]; then
@@ -408,7 +468,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # "ppa:team-xbmc/ppa"
                   # "ppa:libreoffice/ppa"
-                  apprepo=("ppa:wfg/0ad" "ppa:otto-kesselgulasch/gimp" "ppa:inkscape.dev/stable" "ppa:philip5/extra" "ppa:pmjdebruijn/darktable-release" "deb https://deb.opera.com/opera-stable/ stable non-free" "deb http://download.virtualbox.org/virtualbox/debian xenial contrib" "deb https://download.sublimetext.com/ apt/stable/" "ppa:nextcloud-devs/client" "ppa:nitrokey-team/ppa");
+                  apprepo=("ppa:wfg/0ad" "ppa:otto-kesselgulasch/gimp" "ppa:inkscape.dev/stable" "ppa:philip5/extra" "ppa:pmjdebruijn/darktable-release" "deb https://deb.opera.com/opera-stable/ stable non-free" "deb http://download.virtualbox.org/virtualbox/debian xenial contrib" "deb https://download.sublimetext.com/ apt/stable/" "ppa:nextcloud-devs/client" "ppa:nitrokey-team/ppa" "ppa:serge-rider/dbeaver-ce" "ppa:videolan/stable-daily" "deb [arch=amd64] https://repo.skype.com/deb stable main" "ppa:andrewsomething/digitalocean");
                   # "deb http://download.opensuse.org/repositories/home:/rawtherapee/xUbuntu_16.04/ /"
 
                   for b in "${apprepo[@]}"; do
@@ -421,7 +481,8 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # Adding external repositories keys
 
-                  apprepokey=("https://deb.opera.com/archive.key" "https://www.virtualbox.org/download/oracle_vbox_2016.asc" "https://www.virtualbox.org/download/oracle_vbox.asc" "https://download.sublimetext.com/sublimehq-pub.gpg" "https://packages.microsoft.com/keys/microsoft.asc");
+                  apprepokey=("https://deb.opera.com/archive.key" "https://www.virtualbox.org/download/oracle_vbox_2016.asc" "https://www.virtualbox.org/download/oracle_vbox.asc" "https://download.sublimetext.com/sublimehq-pub.gpg" "https://packages.microsoft.com/keys/microsoft.asc"
+                  "https://repo.skype.com/data/SKYPE-GPG-KEY");
                   # "http://download.opensuse.org/repositories/home:/rawtherapee/xUbuntu_16.04/Release.key"
 
                   for c in "${apprepokey[@]}"; do
@@ -444,16 +505,20 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # python-gpgme - for Dropbox client
                   # firmware-b43-installer - wifi and sdhc card slot drivers for macmini
                   # gir1.2-webkit-3.0 - for digitalocean app indicator
-                  applib="firmware-b43-installer folder-color gedit-plugins gir1.2-webkit-3.0 glade gnome-color-manager libc6:i386 libgtk2-appindicator-perl libpng16-16 libqt5core5a libqt5widgets5 libqt5x11extras5 libsdl1.2debian libsdl-ttf2.0-0 python-configobj python-glade2 python-gtk2 python-gtk-vnc rhythmbox-plugin-alternative-toolbar software-properties-common transcode hunspell-en-au mythes-en-au hunspell-en-ca libreoffice-l10n-en-za hunspell-en-za hyphen-en-gb libreoffice-help-en-gb thunderbird-locale-en-gb libreoffice-l10n-en-gb hunspell-en-gb kde-l10n-engb python-gpgme";
+                  # libncurses5-dev - for progress utility
+                  # libnss-mdns:i386 - for crossover
+                  # texlive-latex-base texlive-fonts-recommended texlive-latex-recommended texlive-latex-extra - for pdflatex
+                  applib="firmware-b43-installer folder-color gedit-plugins gir1.2-webkit-3.0 glade gnome-color-manager hunspell-en-au hunspell-en-ca hunspell-en-gb hunspell-en-za hyphen-en-gb kde-l10n-engb libc6:i386 libgtk2-appindicator-perl libncurses5-dev libnss-mdns:i386 libpng16-16 libqt5core5a libqt5widgets5 libqt5x11extras5 libreoffice-help-en-gb libreoffice-l10n-en-gb libreoffice-l10n-en-za libsdl-ttf2.0-0 libsdl1.2debian mythes-en-au python-configobj python-glade2 python-gpgme python-gtk-vnc python-gtk2 rhythmbox-plugin-alternative-toolbar software-properties-common texlive-fonts-recommended texlive-latex-base texlive-latex-extra texlive-latex-recommended thunderbird-locale-en-gb transcode";
 
                   # CLI Applications
                   # dkms - for enabling USB devices inside guest OS for the VirtualBox's host OS
-                  appcli="adobe-flashplugin apache2 apt-listchanges apt-mirror arp-scan autoconf clamav clamav-daemon clamav-freshclam cmus curl debconf-utils default-jdk default-jre dkms dtrx duplicity exfat-fuse exfat-utils fail2ban ffmpeg git glances htop iptraf lm-sensors mc ntp ntpdate openssh-server p7zip powerline python-pip rcconf redshift rig screen shellcheck sysbench sysv-rc-conf tasksel terminator testdisk tig tmux unattended-upgrades wavemon whois xclip";
+                  # do not need anymore: clamav clamav-daemon clamav-freshclam fail2ban
+                  appcli="adobe-flashplugin apache2 apt-listchanges apt-mirror arp-scan autoconf cmus curl debconf-utils default-jdk default-jre dkms dtrx duplicity exfat-fuse exfat-utils exiftool ffmpeg git glances htop iptraf lm-sensors mc nodejs npm ntp ntpdate openssh-server p7zip p7zip-rar powerline python-pip rar rcconf redshift rig screen shellcheck sysbench sysv-rc-conf tasksel terminator testdisk tig tmux tree unace unattended-upgrades wavemon whois xclip";
 
                   # GUI Applications
                   # unity-tweaktool, shutter ?????
-                  # do not need anymore: amarok gpodder gwenview kate krita ktorrent yakuake kodi brasero clamtk gnome-control-center gnome-online-accounts
-                  appgui="0ad aptoncd audacity bleachbit caffeine code compizconfig-settings-manager darktable digikam5 easytag evolution filezilla geary gimp gimp-gmic gimp-plugin-registry gmic gnome-sushi glipper gnucash gparted gpick gramps gresolver handbrake homebank indicator-cpufreq indicator-multiload inkscape k3b keepassx kmymoney mysql-workbench nautilus-actions nautilus-image-converter nextcloud-client nitrokey-app openttd pdfchain pdfshuffler pidgin rawtherapee redshift-gtk shutter soundconverter sound-juicer sublime-text terminator uget unity-tweak-tool virtualbox-5.1 virt-viewer vlc workrave winff";
+                  # do not need anymore: 0ad amarok brasero clamtk gnome-control-center gnome-online-accounts gpodder gwenview kate kodi krita ktorrent yakuake digikam5 geary indicator-cpufreq k3b gpick rawtherapee
+                  appgui="aptoncd audacity bleachbit caffeine code compizconfig-settings-manager darktable dbeaver-ce deluge digitalocean-indicator easytag evolution filezilla gimp gimp-gmic gimp-plugin-registry gmic gnome-sushi glipper gnucash gparted gramps gresolver handbrake hexchat homebank indicator-multiload inkscape keepassx kmymoney mysql-workbench nautilus-actions nautilus-image-converter nextcloud-client nitrokey-app openttd pdfchain pdfshuffler pidgin redshift-gtk shutter soundconverter sound-juicer sublime-text skypeforlinux terminator uget unity-tweak-tool virtualbox-5.2 virt-viewer vlc workrave winff";
 
                   # The main multi-loop for installing apps/libs
                   for d in $applib $appcli $appgui; do
@@ -474,7 +539,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   debsel=(
                     "opera-stable opera-stable/add-deb-source select false"
-                    "macchanger macchanger/automatically_run select true"
+                    # "macchanger macchanger/automatically_run select true"
                     "wireshark-common wireshark-common/install-setuid select true"
                     "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true"
                   );
@@ -482,7 +547,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # The applications that shows pop-ups during the their installation
                   debsel2=(
                     "opera-stable"
-                    "macchanger"
+                    # "macchanger"
                     "wireshark"
                     "ubuntu-restricted-extras"
                   );
@@ -497,11 +562,11 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   blnk_echo;
 
                   # Installing RKHunter
-                  inst_echo RKHunter;
-                  debconf-set-selections <<< "postfix postfix/mailname string "$hstnm"" && debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Local Only'" && quietinst rkhunter;
+                  # inst_echo RKHunter;
+                  # debconf-set-selections <<< "postfix postfix/mailname string "$hstnm"" && debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Local Only'" && quietinst rkhunter;
                   #apt-get -yqq install rkhunter > $den1;
 
-                  blnk_echo;
+                  # blnk_echo;
                   up;
 
                   # END: Separate installation subsection (1st)
@@ -516,26 +581,26 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # The list of direct links to the downloaded apps
                   app=(
-                    "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/skype.deb"
+                    # "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/skype.deb"
                     "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/atom.deb"
-                    "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/pac.deb"
-                    "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/dbeaver.deb"
+                    # "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/pac.deb"
+                    # "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/895b7a005785d11f63843787799b6a8dadfe2894/dbeaver.deb"
                     );
 
                   # The list of 256 shasums of the eralier downloaded apps
                   app2=(
-                    "1f31c0e9379f680f2ae2b4db3789e936627459fe0677306895a7fa096c7db2c5"
+                    # "1f31c0e9379f680f2ae2b4db3789e936627459fe0677306895a7fa096c7db2c5"
                     "870a763c3033db8b812f3367e2de7bb383ba2d791b6ab9af70e31e7ad33ddbac"
-                    "82e73c8631fe055a79dc4352956ed22df05cbae1886ceaeb22b2bf562b0eb9ca"
-                    "6abfd028162f3cb0044aebf191cdf2887414c83d5fd008565024c44fee074c4e"
+                    # "82e73c8631fe055a79dc4352956ed22df05cbae1886ceaeb22b2bf562b0eb9ca"
+                    # "6abfd028162f3cb0044aebf191cdf2887414c83d5fd008565024c44fee074c4e"
                     );
 
                   # The list of names of the downloaded apps
                   app3=(
-                    "skype.deb"
+                    # "skype.deb"
                     "atom.deb"
-                    "pac.deb"
-                    "dbeaver.deb"
+                    # "pac.deb"
+                    # "dbeaver.deb"
                     );
 
                   # Checking if there is any internet connection by getting ones public IP
@@ -582,67 +647,67 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # Separate installation subsection (3rd)
 
-                  sctn_echo INSTALLATION "#6";
-
-                  # The loop
-                  applctn=/usr/bin;
-                  #tmpth=/tmp/inst_session;
-                  #mkdir -p $tmpth && cd $tmpth;
-
-                  # The list of direct links to the downloaded apps
-                  app=(
-                    "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/4fb37e36006838b913cae644ef497d8787ca67b1/vcrypt.tar"
-                    "https://download.jetbrains.com/python/pycharm-edu-4.0.tar.gz"
-                    );
-
-                  # The list of 256 shasums of the eralier downloaded apps
-                  app2=(
-                    "b6a1c8000e9d1bb707e7276e24b8777bea435ec28aa549cfb552b94194a48088"
-                    "ff057e9ad76e58f7441698aec3d0200d7808a9a113e0db7030f432d5289ee30b"
-                    );
-
-                  # The list of names of the downloaded ppps
-                  app3=(
-                    "vcrypt.tar"
-                    "pycharm.tar.gz"
-                    );
-
-                  # Checking if there is any internet connection by getting ones public IP
-                  if [[ $(curl --silent $ipinf) ]]; then
-
-                    for g in ${!app[*]}; do
-
-                      # Checking if the required link is valid
-                      if curl -L --output /dev/null --silent --fail -r 0-0 "${app[$g]}"; then
-
-                        # Getting the actual installation package
-                         dwnl_echo "${app3[$g]}";
-                         curl -L --silent "${app[$g]}" > "${app3[$g]}";
-
-                        # Verifying the SHA256SUM of the package
-                        if [[ $(shasum -a 256 "${app3[$g]}" | grep "${app2[$g]}") ]]; then
-
-                          # Unarchiving the application into $applctn
-                          inst_echo "${app3[$g]}";
-                          tar -xf $tmpth/"${app3[$g]}" -C $applctn;
-
-                        else
-                          rm -rf $tmpth/"${app3[$g]}";
-                          shaserr_echo "${app3[$g]}";
-                        fi;
-
-                      else
-                          nolnk_echo "${app[$g]}";
-                      fi;
-
-                    done
-
-                  else
-                      nonet_echo;
-                      std_echo;
-                  fi
-
-                  # END: Separate installation subsection (3nd)
+                  # sctn_echo INSTALLATION "#6";
+                  #
+                  # # The loop
+                  # applctn=/usr/bin;
+                  # #tmpth=/tmp/inst_session;
+                  # #mkdir -p $tmpth && cd $tmpth;
+                  #
+                  # # The list of direct links to the downloaded apps
+                  # app=(
+                  #   "https://bitbucket.org/crtcji/ubuntunecessaryapps/raw/4fb37e36006838b913cae644ef497d8787ca67b1/vcrypt.tar"
+                  #   # "https://download.jetbrains.com/python/pycharm-edu-4.0.tar.gz"
+                  #   );
+                  #
+                  # # The list of 256 shasums of the eralier downloaded apps
+                  # app2=(
+                  #   "b6a1c8000e9d1bb707e7276e24b8777bea435ec28aa549cfb552b94194a48088"
+                  #   # "ff057e9ad76e58f7441698aec3d0200d7808a9a113e0db7030f432d5289ee30b"
+                  #   );
+                  #
+                  # # The list of names of the downloaded ppps
+                  # app3=(
+                  #   "vcrypt.tar"
+                  #   # "pycharm.tar.gz"
+                  #   );
+                  #
+                  # # Checking if there is any internet connection by getting ones public IP
+                  # if [[ $(curl --silent $ipinf) ]]; thens
+                  #
+                  #   for g in ${!app[*]}; do
+                  #
+                  #     # Checking if the required link is valid
+                  #     if curl -L --output /dev/null --silent --fail -r 0-0 "${app[$g]}"; then
+                  #
+                  #       # Getting the actual installation package
+                  #        dwnl_echo "${app3[$g]}";
+                  #        curl -L --silent "${app[$g]}" > "${app3[$g]}";
+                  #
+                  #       # Verifying the SHA256SUM of the package
+                  #       if [[ $(shasum -a 256 "${app3[$g]}" | grep "${app2[$g]}") ]]; then
+                  #
+                  #         # Unarchiving the application into $applctn
+                  #         inst_echo "${app3[$g]}";
+                  #         tar -xf $tmpth/"${app3[$g]}" -C $applctn;
+                  #
+                  #       else
+                  #         rm -rf $tmpth/"${app3[$g]}";
+                  #         shaserr_echo "${app3[$g]}";
+                  #       fi;
+                  #
+                  #     else
+                  #         nolnk_echo "${app[$g]}";
+                  #     fi;
+                  #
+                  #   done
+                  #
+                  # else
+                  #     nonet_echo;
+                  #     std_echo;
+                  # fi
+                  #
+                  # # END: Separate installation subsection (3nd)
 
 
                   # Separate installation subsection (4th)
@@ -679,45 +744,78 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   fi
 
 
-                  # Netbeans
-                  nb_lnk=(http://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-linux.sh);
-                  nb_shsm=('0442d4eaae5334f91070438512b2e8abf98fc84f07a9352afbc2c4ad437d306c');
-                  nb=(netbeans-8.2-linux.sh);
+                  # # Netbeans
+                  # nb_lnk=(http://download.netbeans.org/netbeans/8.2/final/bundles/netbeans-8.2-linux.sh);
+                  # nb_shsm=('0442d4eaae5334f91070438512b2e8abf98fc84f07a9352afbc2c4ad437d306c');
+                  # nb=(netbeans-8.2-linux.sh);
+                  #
+                  # # Checking if there is any internet connection by getting ones public IP
+                  # if [[ $(curl --silent $ipinf) ]]; then
+                  #
+                  #   # Checking if the required link is valid
+                  #   if curl -L --output /dev/null --silent --fail -r 0-0 $nb_lnk; then
+                  #
+                  #     # Getting the actual installation package
+                  #     dwnl_echo $nb;
+                  #     curl -L --silent $nb_lnk > $nb;
+                  #
+                  #     # Verifying the SHA256SUM of the archive
+                  #     if [[ $(shasum -a 256 $nb | grep $nb_shsm) ]]; then
+                  #
+                  #         # Installing the package
+                  #         inst_echo $nb;
+                  #         # Setting executable rights
+                  #         chmod +x $nb;
+                  #         # Installing
+                  #         su -c "./$nb --silent" -s /bin/sh $usr
+                  #
+                  #     else
+                  #         rm -rf $tmpth/$nb;
+                  #         shaserr_echo $nb;
+                  #     fi;
+                  #
+                  #   else
+                  #       nolnk_echo $nb;
+                  #   fi;
+                  #
+                  # else
+                  #     nonet_echo;
+                  #     std_echo;
+                  # fi
 
-                  # Checking if there is any internet connection by getting ones public IP
-                  if [[ $(curl --silent $ipinf) ]]; then
+                  up;
+                  blnk_echo;
 
-                    # Checking if the required link is valid
-                    if curl -L --output /dev/null --silent --fail -r 0-0 $nb_lnk; then
+                  # Asbru Connection Manager
+                  acm=(asbru-cm);
+                  inst_echo $acm
+            		  wget -qO- https://packagecloud.io/install/repositories/$acm/$acm/script.deb.sh | sudo bash > /dev/null 2>&1 >> $rlog;
+                  apt-get -yqq install $acm > /dev/null 2>&1 >> $rlog;
 
-                      # Getting the actual installation package
-                      dwnl_echo $nb;
-                      curl -L --silent $nb_lnk > $nb;
+                  up;
 
-                      # Verifying the SHA256SUM of the archive
-                      if [[ $(shasum -a 256 $nb | grep $nb_shsm) ]]; then
+                  # Zoho Cliq
+                  dwnl_echo Cliq
+            		  curl -LO https://www.zoho.com/cliq/downloads/nativeapps/Cliq_1.1.0_amd64.deb > /dev/null 2>&1 >> $rlog;
+                  inst_echo Cliq
+                  dpkg -i Cliq_1.1.0_amd64.deb > /dev/null 2>&1 >> $rlog;
 
-                          # Installing the package
-                          inst_echo $nb;
-                          # Setting executable rights
-                          chmod +x $nb;
-                          # Installing
-                          su -c "./$nb --silent" -s /bin/sh $usr
+                  up;
 
-                      else
-                          rm -rf $tmpth/$nb;
-                          shaserr_echo $nb;
-                      fi;
+                  # Vivaldi Browser
+                  vivaldi=(vivaldi-stable_1.14.1077.55-1_amd64.deb);
+                  curl -LO https://downloads.vivaldi.com/stable/$vivaldi > /dev/null 2>&1 >> $rlog;
+                  dpkg -i $vivaldi > /dev/null 2>&1 >> $rlog;
 
-                    else
-                        nolnk_echo $nb;
-                    fi;
+                  up;
 
-                  else
-                      nonet_echo;
-                      std_echo;
-                  fi
+                  # micro editor
+                  snap install slack micro --edge --classic > /dev/null 2>&1 >> $rlog;
 
+                  # snap installations
+                  snap install doctl
+
+                  up;
 
                   # Updating Python PIP
                   echo -e "Updating \e[1m\e[34mpip\e[0m";
@@ -727,24 +825,25 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   inst_echo Speedtest;
                   pip install speedtest-cli --upgrade > $dn >> $rlog;
 
-                  # Installing Micro Editor
-                  #inst_echo Micro Editor;
-                  #snap install micro --edge --classic;
-
                   blnk_echo;
                   up;
 
                   # END: Separate installation subsection (4th)
 
-                  # Atom addons installation section
-                  # Default location $hm/$usr/.atom/packages
 
                   # Installing dependency for "atom-beautify" plugin
                   inst_echo beautysh;
                   pip install beautysh > $dn >> $rlog;
 
+
+                  # Starting a $usr subshell
+
                   su $usr bash -c '
-                  apms="ask-stack atom-beautify atom-html-preview atom-mysql-snippets atom-reverser auto-update-plus autocomplete-paths build busy-signal chronometer code-peek duplicate-line-or-selection emmet file-icons fold-navigator fonts git-blame git-control git-time-machine highlight-selected imdone-atom imdone-atom-github intentions language-docker language-markdown language-routeros-script language-svg linter linter-shellcheck linter-ui-default markdown-pdf markdown-preview-plus merge-conflicts minimap platformio-ide-terminal preview script sort-lines svg-preview symbols-tree-view sunset sync-settings todo-show tomato-timer tool-bar tool-bar-main tree-view-git-status updater-notify wakatime";
+
+                  # Atom addons installation section
+                  # Default location $hm/$usr/.atom/packages
+
+                  apms="aligner-php ask-stack atom-beautify atom-csv-markdown atom-html-preview atom-material-syntax atom-material-ui atom-mysql-snippets atom-reverser atom-wordpress auto-update-plus autocomplete-paths autocomplete-php autocomplete-wordpress-hooks build busy-signal chronometer code-peek color-picker duplicate-line-or-selection emmet emmet file-icons fold-navigator fonts git-blame git-control git-time-machine highlight-line highlight-selected imdone-atom imdone-atom-github intentions language-docker language-markdown language-routeros-script language-svg linter linter-csslint linter-htmlhint linter-js-yaml linter-jshint linter-php linter-phpcs linter-phpmd linter-scss-lint linter-shellcheck linter-tidy linter-ui-default livereload markdown-pdf markdown-preview-plus markdown-writer merge-conflicts minimap pandoc-convert pigments platformio-ide-terminal preview project-manager script sort-lines sunset svg-preview symbols-tree-view sync-settings tablr theme-switch todo-show tomato-timer tool-bar tool-bar-main tool-bar-markdown-writer tree-view-git-status typewriter updater-notify wakatime wordcount wordpress wordpress-api wordpress-dictionary wordpress-suite wp-dev zen";
 
                   echo "Installing Atom plugins:";
 
@@ -755,11 +854,29 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     apm install $m > /home/crt/installation.log;
                   done
 
+
+                  # JetBrains ToolBox
+                  cd '$hm'/'$usr'/Downloads;
+                  curl -LO https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.6.2914.tar.gz  > /dev/null 2>&1 >> $rlog;
+                  tar -xf jetbrains-toolbox-1.6.2914.tar.gz > /dev/null 2>&1 >> $rlog;
+
+                  # Zoho Docs universal link
+                  curl -LO https://www.zoho.com/docs/36925/ZohoDocs_x64.tar.gz
+                  tar -xf ZohoDocs_x64.tar.gz
+
+                  # Tresorit
+                  curl -LO https://installerstorage.blob.core.windows.net/public/install/tresorit_installer.run
+                  chmod +x tresorit_installer.run
+                  # && ./tresorit_installer.run
+                  # answer "n" twice
+
                   exit'
 
                   blnk_echo;
 
                   # END: Atom addons installation section
+
+                  # The End of the $usr subshell
 
                   # END: Installing CLI utilities
 
@@ -775,58 +892,58 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   telepack=(
                   "unity-lens-shopping"
                   "unity-webapps-common"
-                  "apturl"
-                  "remote-login-service"
-                  "lightdm-remote-session-freerdp"
-                  "lightdm-remote-session-uccsconfigure"
-                  "zeitgeist"
-                  "zeitgeist-datahub"
-                  "zeitgeist-core"
-                  "zeitgeist-extension-fts"
+                  # "apturl"
+                  # "remote-login-service"
+                  # "lightdm-remote-session-freerdp"
+                  # "lightdm-remote-session-uccsconfigure"
+                  # "zeitgeist"
+                  # "zeitgeist-datahub"
+                  # "zeitgeist-core"
+                  # "zeitgeist-extension-fts"
                   "cups"
                   "cups-server-common"
-                  "remmina"
-                  "remmina-common"
-                  "remmina-plugin-rdp"
-                  "remmina-plugin-vnc"
+                  # "remmina"
+                  # "remmina-common"
+                  # "remmina-plugin-rdp"
+                  # "remmina-plugin-vnc"
                   "unity8*"
                   "gdbserver"
-                  "gvfs-fuse"
-                  "evolution-data-server"
-                  "evolution-data-server-online-accounts"
-                  "snapd"
+                  # "gvfs-fuse"
+                  # "evolution-data-server"
+                  # "evolution-data-server-online-accounts"
+                  # "snapd"
                   "libhttp-daemon-perl"
                   "vino"
-                  "unity-scope-video-remote"
+                  # "unity-scope-video-remote"
                   )
 
                   # Comments to each purged telepack
                   telepack2=(
                   "Unity Amazon"
                   "Unity web apps"
-                  "gives possibilities to start installation by clicking on url, can be executed with js, which is not secure"
-                  "remote login for LightDm"
-                  "remote login rdp for LightDm"
-                  "remote login uccsconfigure for LightDm"
-                  "Zeitgeist Basic Telemetry"
-                  "Zeitgeist Basic Telemetry"
-                  "Zeitgeist Basic Telemetry"
-                  "Zeitgeist Basic Telemetry"
+                  # "gives possibilities to start installation by clicking on url, can be executed with js, which is not secure"
+                  # "remote login for LightDm"
+                  # "remote login rdp for LightDm"
+                  # "remote login uccsconfigure for LightDm"
+                  # "Zeitgeist Basic Telemetry"
+                  # "Zeitgeist Basic Telemetry"
+                  # "Zeitgeist Basic Telemetry"
+                  # "Zeitgeist Basic Telemetry"
                   "if you don't use printers"
                   "if you don't use printers"
-                  "has libraries for remote connection, which can be unsecure"
-                  "has libraries for remote connection, which can be unsecure"
-                  "has libraries for remote connection, which can be unsecure"
-                  "has libraries for remote connection, which can be unsecure"
+                  # "has libraries for remote connection, which can be unsecure"
+                  # "has libraries for remote connection, which can be unsecure"
+                  # "has libraries for remote connection, which can be unsecure"
+                  # "has libraries for remote connection, which can be unsecure"
                   "just remove it, because of potential telemetry from unity8, which is in beta state and exists only for preview, for now you can use 7 version. potential problem"
                   "remote tool for gnome debug"
-                  "virtual file system.potential problem"
-                  "I just don't like server word here. Potentional connection possibility? potential problem"
-                  "potential problem"
-                  "telemetric package manager from canonical"
+                  # "virtual file system.potential problem"
+                  # "I just don't like server word here. Potentional connection possibility? potential problem"
+                  # "potential problem"
+                  # "telemetric package manager from canonical"
                   "http server for perl"
                   "vnc server (remote desktop share tool)"
-                  "potential problem"
+                  # "potential problem"
                   )
 
                   # The loop
@@ -841,109 +958,110 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # END: Telemetry section
 
 
-                  # ClamAV section: configuration and the first scan
-
-                  clmcnf=(/etc/clamav/freshclam.conf);
-                  rprtfldr=(/home/$usr/ClamAV-Reports);
-
-                  sctn_echo ANTIVIRUS "(Clam-AV)";
-                  bckup $clmcnf;
-                  mkdir -p $rprtfldr;
-
-                  # Enabling "SafeBrowsing true" mode
-                  enbl_echo SafeBrowsing;
-                  echo "SafeBrowsing true" >> $clmcnf;
-
-                  # Restarting CLAMAV Daemons
-                  /etc/init.d/clamav-daemon restart && /etc/init.d/clamav-freshclam restart
-                  # clamdscan -V s
-
-                  # Scanning the whole system and palcing all the infected files list on a particular file
-                  # echo "ClamAV is scanning the OS ...";
-                  scn_echo ClamAv
-                  # This one throws any kind of warnings and errors: clamscan -r / | grep FOUND >> $rprtfldr/clamscan_first_scan.txt > $dn >> $rlog;
-                  clamscan --recursive --no-summary --infected / 2>/dev/null | grep FOUND >> $rprtfldr/clamscan_first_scan.txt;
-                  # Crontab: The daily scan
-
-                  # The below cronjob will run a virus database definition update (so that the scan always has the most recent definitions) and afterwards run a full scan which will only report when there are infected files on the system. It also does not remove the infected files automatically, you have to do this manually. This way you make sure that it does not delete /bin/bash by accident.
+                  # # ClamAV section: configuration and the first scan
                   #
-                  # The 2>/dev/null options keeps the /proc and such access denied errors out of the report. The infected files however are still found and reported.
+                  # clmcnf=(/etc/clamav/freshclam.conf);
+                  # rprtfldr=(/home/$usr/ClamAV-Reports);
                   #
-                  # Also make sure that your cron is configured so that it mails you the output of the cronjobs. The manual page will help you with that.
-
-                  # One way: if the computer is off in the time frame when it is supposed to be scanned by the daemon, it will NOT be scanned next time the computer is on.
-                                    #crontab -l | { cat; echo "
-                  # ## ClamAV Daily scan
-                  # 30 01 * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected / 2>/dev/null >> $rprtfldr/clamscan_daily.txt"; } | crontab -
-
-                  # This way, Anacron ensures that if the computer is off during the time interval when it is supposed to be scanned by the daemon, it will be scanned next time it is turned on, no matter today or another day.
-                  echo -e "Creating a \e[1m\e[34mcronjob\e[0m for the ClamAV ...";
-                  echo -e '#!/bin/bash\n\n/usr/bin/freshclam --quiet;\n/usr/bin/clamscan --recursive --exclude-dir=/media/ --no-summary --infected / 2>/dev/null >> '$rprtfldr'/clamscan_daily_$(date +"%m-%d-%Y").txt;' >> /etc/cron.daily/clamscan.sh && chmod 755 /etc/cron.daily/clamscan.sh;
-
-                  blnk_echo;
-
-                  # END: ClamAV section: configuration and the first scan
-
-
-                  # RKHunter configuration section
-                  sctn_echo ANTI-MALWARE "(RKHunter)"
-                  # The first thing we should do is ensure that our rkhunter version is up-to-date.
-                  rkhunter --versioncheck > $dn >> $rlog;
-
-                  # Verifying if the previous command run successfully (exit status 0) then it goes to the next step
-                  RESULT=$?
-                  if [ $RESULT -eq 0 ]; then
-                    upd_echo rkhunter;
-                    # Updating our data files.
-
-                    # // FIXME: The following two commands are a temporary workaround because for the first time of running it gives eq=1, so there is a need to tun it for the second time in order to get eq=0 so that the rest of the statements are executed. id:1 gh:3
-                    rkhunter --update > $dn >> $rlog;
-                    rkhunter --update > $dn >> $rlog;
-
-                    RESULT2=$?
-                    if [ $RESULT2 -eq 0 ]; then
-                      upd_echo rkhunter signatures;
-                      # With our database files refreshed, we can set our baseline file properties so that rkhunter can alert us if any of the essential configuration files it tracks are altered. We need to tell rkhunter to check the current values and store them as known-good values:
-                      rkhunter --propupd > $dn >> $rlog;
-
-                      RESULT3=$?
-                      if [ $RESULT3 -eq 0 ]; then
-                        scn_echo RKHunter
-                        # Finally, we are ready to perform our initial run. This will produce some warnings. This is expected behavior, because rkhunter is configured to be generic and Ubuntu diverges from the expected defaults in some places. We will tell rkhunter about these afterwards:
-                        # rkhunter -c --enable all --disable none
-
-                        # Note: This will be executed only if the previous one was executed
-                        # Another alternative to checking the log is to have rkhunter print out only warnings to the screen, instead of all checks:
-                        rkhunter -c --enable all --disable none --rwo > $dn >> $rlog;
-
-                      else
-                        echo "\e[1m\e[34mRKHunter\e[0m is scanning the OS \e[1m\e[31mFAILED\e[0m.";
-                        std_echo;
-                      fi
+                  # sctn_echo ANTIVIRUS "(Clam-AV)";
+                  # bckup $clmcnf;
+                  # mkdir -p $rprtfldr;
+                  #
+                  # # Enabling "SafeBrowsing true" mode
+                  # enbl_echo SafeBrowsing;
+                  # echo "SafeBrowsing true" >> $clmcnf;
+                  #
+                  # # Restarting CLAMAV Daemons
+                  # /etc/init.d/clamav-daemon restart && /etc/init.d/clamav-freshclam restart
+                  # # clamdscan -V s
+                  #
+                  # # Scanning the whole system and palcing all the infected files list on a particular file
+                  # # echo "ClamAV is scanning the OS ...";
+                  # scn_echo ClamAv
+                  # # This one throws any kind of warnings and errors: clamscan -r / | grep FOUND >> $rprtfldr/clamscan_first_scan.txt > $dn >> $rlog;
+                  # clamscan --recursive --no-summary --infected / 2>/dev/null | grep FOUND >> $rprtfldr/clamscan_first_scan.txt;
+                  # # Crontab: The daily scan
+                  #
+                  # # The below cronjob will run a virus database definition update (so that the scan always has the most recent definitions) and afterwards run a full scan which will only report when there are infected files on the system. It also does not remove the infected files automatically, you have to do this manually. This way you make sure that it does not delete /bin/bash by accident.
+                  # #
+                  # # The 2>/dev/null options keeps the /proc and such access denied errors out of the report. The infected files however are still found and reported.
+                  # #
+                  # # Also make sure that your cron is configured so that it mails you the output of the cronjobs. The manual page will help you with that.
+                  #
+                  # # One way: if the computer is off in the time frame when it is supposed to be scanned by the daemon, it will NOT be scanned next time the computer is on.
+                  #                   #crontab -l | { cat; echo "
+                  # # ## ClamAV Daily scan
+                  # # 30 01 * * * /usr/bin/freshclam --quiet; /usr/bin/clamscan --recursive --no-summary --infected / 2>/dev/null >> $rprtfldr/clamscan_daily.txt"; } | crontab -
+                  #
+                  # # This way, Anacron ensures that if the computer is off during the time interval when it is supposed to be scanned by the daemon, it will be scanned next time it is turned on, no matter today or another day.
+                  # echo -e "Creating a \e[1m\e[34mcronjob\e[0m for the ClamAV ...";
+                  # echo -e '#!/bin/bash\n\n/usr/bin/freshclam --quiet;\n/usr/bin/clamscan --recursive --exclude-dir=/media/ --no-summary --infected / 2>/dev/null >> '$rprtfldr'/clamscan_daily_$(date +"%m-%d-%Y").txt;' >> /etc/cron.daily/clamscan.sh && chmod 755 /etc/cron.daily/clamscan.sh;
+                  #
+                  # blnk_echo;
+                  #
+                  # # END: ClamAV section: configuration and the first scan
 
 
-                    else
-                      updfld_echo rkhunter signatures;
-                      std_echo;
-                    fi
-
-                  else
-                    updfld_echo rkhunter;
-                    std_echo;
-                  fi
-
-
-                  # for viewing the logs
-                  # cat /var/log/rkhunter.log | grep -w "Warning:"
-
-                  # Crontab (Anacron): The daily scan
-                  # The previous 3 if statements are useless, because the line bellow do all the same
-                  # The --cronjob option tells rkhunter to not output in a colored format and to not require interactive key presses. The update option ensures that our definitions are up-to-date. The quiet option suppresses all output.
-                  echo -e '#!/bin/bash\n\n/usr/bin/rkhunter --cronjob --update --quiet;' >> /etc/cron.daily/rkhunter_scan.sh && chmod 755 /etc/cron.daily/rkhunter_scan.sh;
-
-                  blnk_echo;
-
-                  # END: RKHunter configuration section
+                  # NOTE - need to retest
+                  # # RKHunter configuration section
+                  # sctn_echo ANTI-MALWARE "(RKHunter)"
+                  # # The first thing we should do is ensure that our rkhunter version is up-to-date.
+                  # rkhunter --versioncheck > $dn >> $rlog;
+                  #
+                  # # Verifying if the previous command run successfully (exit status 0) then it goes to the next step
+                  # RESULT=$?
+                  # if [ $RESULT -eq 0 ]; then
+                  #   upd_echo rkhunter;
+                  #   # Updating our data files.
+                  #
+                  #   # // FIXME: The following two commands are a temporary workaround because for the first time of running it gives eq=1, so there is a need to tun it for the second time in order to get eq=0 so that the rest of the statements are executed. id:1 gh:3
+                  #   rkhunter --update > $dn >> $rlog;
+                  #   rkhunter --update > $dn >> $rlog;
+                  #
+                  #   RESULT2=$?
+                  #   if [ $RESULT2 -eq 0 ]; then
+                  #     upd_echo rkhunter signatures;
+                  #     # With our database files refreshed, we can set our baseline file properties so that rkhunter can alert us if any of the essential configuration files it tracks are altered. We need to tell rkhunter to check the current values and store them as known-good values:
+                  #     rkhunter --propupd > $dn >> $rlog;
+                  #
+                  #     RESULT3=$?
+                  #     if [ $RESULT3 -eq 0 ]; then
+                  #       scn_echo RKHunter
+                  #       # Finally, we are ready to perform our initial run. This will produce some warnings. This is expected behavior, because rkhunter is configured to be generic and Ubuntu diverges from the expected defaults in some places. We will tell rkhunter about these afterwards:
+                  #       # rkhunter -c --enable all --disable none
+                  #
+                  #       # Note: This will be executed only if the previous one was executed
+                  #       # Another alternative to checking the log is to have rkhunter print out only warnings to the screen, instead of all checks:
+                  #       rkhunter -c --enable all --disable none --rwo > $dn >> $rlog;
+                  #
+                  #     else
+                  #       echo "\e[1m\e[34mRKHunter\e[0m is scanning the OS \e[1m\e[31mFAILED\e[0m.";
+                  #       std_echo;
+                  #     fi
+                  #
+                  #
+                  #   else
+                  #     updfld_echo rkhunter signatures;
+                  #     std_echo;
+                  #   fi
+                  #
+                  # else
+                  #   updfld_echo rkhunter;
+                  #   std_echo;
+                  # fi
+                  #
+                  #
+                  # # for viewing the logs
+                  # # cat /var/log/rkhunter.log | grep -w "Warning:"
+                  #
+                  # # Crontab (Anacron): The daily scan
+                  # # The previous 3 if statements are useless, because the line bellow do all the same
+                  # # The --cronjob option tells rkhunter to not output in a colored format and to not require interactive key presses. The update option ensures that our definitions are up-to-date. The quiet option suppresses all output.
+                  # echo -e '#!/bin/bash\n\n/usr/bin/rkhunter --cronjob --update --quiet;' >> /etc/cron.daily/rkhunter_scan.sh && chmod 755 /etc/cron.daily/rkhunter_scan.sh;
+                  #
+                  # blnk_echo;
+                  #
+                  # # END: RKHunter configuration section
 
 
                   # Unattended-Upgrades configuration section
@@ -1084,11 +1202,12 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "pac_start.desktop"
                     "Launch TeamDrive.desktop"
                     "evolution.desktop"
-                    "geary.desktop"
-                    "transmission-gtk.desktop"
                     "uget-gtk.desktop"
-                    "opera.desktop"
                     "hexchat.desktop"
+                    "nitrokey.desktop"
+                    "deluge-gtk.desktop"
+                    "remmina-applet.desktop"
+                    "digitalocean-indicator-autostart.desktop"
                   );
 
                   # The list of the shortcuts names content
@@ -1333,28 +1452,6 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                     "[Desktop Entry]
                     Type=Application
-                    Exec=geary
-                    Hidden=false
-                    NoDisplay=false
-                    X-GNOME-Autostart-enabled=true
-                    Name[en_US]=Geary
-                    Name=Geary
-                    Comment[en_US]=Autostart Geary Mail Client
-                    Comment=Autostart Geary Mail Client"
-
-                    "[Desktop Entry]
-                    Type=Application
-                    Exec=transmission-gtk
-                    Hidden=false
-                    NoDisplay=false
-                    X-GNOME-Autostart-enabled=true
-                    Name[en_US]=Transmission
-                    Name=Transmission
-                    Comment[en_US]=Startup Transmission
-                    Comment=Startup Transmission"
-
-                    "[Desktop Entry]
-                    Type=Application
                     Exec=uget-gtk
                     Hidden=false
                     NoDisplay=false
@@ -1363,17 +1460,6 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     Name=uGet
                     Comment[en_US]=Autostart uGet
                     Comment=Autostart uGet"
-
-                    "[Desktop Entry]
-                    Type=Application
-                    Exec=opera
-                    Hidden=false
-                    NoDisplay=false
-                    X-GNOME-Autostart-enabled=true
-                    Name[en_US]=Opera
-                    Name=Opera
-                    Comment[en_US]=Autostart
-                    Comment=Autostart"
 
                     "[Desktop Entry]
                     Type=Application
@@ -1386,6 +1472,45 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     Comment[en_US]=Autostart HexChat
                     Comment=Autostart HexChat"
 
+                    "[Desktop Entry]
+                    Type=Application
+                    Exec=nitrokey-app
+                    Hidden=false
+                    NoDisplay=false
+                    X-GNOME-Autostart-enabled=true
+                    Name[en_US]=NitroKey
+                    Name=NitroKey
+                    Comment[en_US]=Autostart NitroKey
+                    Comment=Autostart NitroKey"
+
+                    "[Desktop Entry]
+                    Type=Application
+                    Exec=deluge-gtk
+                    Hidden=false
+                    NoDisplay=false
+                    X-GNOME-Autostart-enabled=true
+                    Name[en_US]=Deluge
+                    Name=Deluge
+                    Comment[en_US]=Autostart Deluge
+                    Comment=Autostart Deluge"
+
+                    "[Desktop Entry]
+                    Version=1.0
+                    Name=Remmina Applet
+                    Comment=Connect to remote desktops through the applet menu
+                    Icon=remmina
+                    Exec=remmina -i
+                    Terminal=false
+                    Type=Application
+                    Hidden=false"
+
+                    "[Desktop Entry]
+                    Type=Application
+                    Exec=digitalocean-indicator
+                    Icon=digitalocean-indicator
+                    Name=Digitalocean Indicator
+                    Comment=Monitor your droplets
+                    X-GNOME-Autostart-enabled=true"
 );
 
                   # There is no autostart directory, so we are going to make it
@@ -1422,13 +1547,14 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # Removing unnecessary apps
                   # list of the packages that are going to be removed
-                  remapp="shotwell";
+                  remapp="shotwell transmission*";
 
                   echo "Removing package(s):";
                   # The main multi-loop for installing apps/libs
                   for k in $remapp; do
                     echo -e "\e[1m\e[34m$k\e[0m";
-                    apt-get -yqq remove $k > /dev/null 2>&1;
+                    # apt-get -yqq remove $k > /dev/null 2>&1;
+                    apt-get -yqq purge $k > /dev/null 2>&1;
                   done
 
                   blnk_echo;
@@ -1445,6 +1571,93 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # Disabling Nautilus feature of automatically opening folders when something is mounted
                   gsettings set org.gnome.desktop.media-handling automount-open false
+
+                  # Nautilus
+                  gsettings set org.gnome.nautilus.preferences click-policy "single"
+                  gsettings set org.gnome.nautilus.preferences enable-delete true
+                  gsettings set org.gnome.nautilus.preferences confirm-trash false
+                  gsettings set org.gnome.nautilus.preferences enable-interactive-search false
+
+                  # Gnome Settings
+                  gsettings set org.gnome.desktop.media-handling automount-open false
+                  gsettings set com.canonical.indicator.datetime show-auto-detected-location true
+                  gsettings set com.canonical.indicator.datetime show-date true
+                  gsettings set com.canonical.indicator.datetime show-day true
+                  gsettings set com.canonical.indicator.datetime show-events true
+                  gsettings set com.canonical.indicator.datetime show-locations true
+                  gsettings set com.canonical.indicator.datetime show-seconds true
+                  gsettings set com.canonical.indicator.datetime time-format '24-hour'
+                  gsettings set org.gnome.desktop.datetime automatic-timezone true
+                  gsettings set org.gnome.desktop.interface clock-format '24h'
+
+                  # gsettings set com.canonical.indicator.datetime custom-time-format '%l:%M %p'
+                  # gsettings set com.canonical.indicator.datetime show-calendar true
+                  # gsettings set com.canonical.indicator.datetime show-clock true
+                  # gsettings set com.canonical.indicator.datetime show-week-numbers false
+                  # gsettings set com.canonical.indicator.datetime show-year true
+                  # gsettings set com.canonical.indicator.datetime timezone-name ''
+
+                  gEdit
+                  gsettings set org.gnome.gedit.preferences.editor auto-save true
+                  gsettings set org.gnome.gedit.preferences.editor auto-save-interval 1
+                  gsettings set org.gnome.gedit.preferences.editor create-backup-copy true
+                  gsettings set org.gnome.gedit.preferences.editor display-line-numbers true
+                  gsettings set org.gnome.gedit.preferences.editor highlight-current-line true
+                  gsettings set org.gnome.gedit.preferences.editor scheme "'oblivion'"
+                  gsettings set org.gnome.gedit.preferences.editor tabs-size 2
+                  gsettings set org.gnome.gedit.preferences.editor bracket-matching true
+                  gsettings set org.gnome.gedit.preferences.editor insert-spaces true
+                  gsettings set org.gnome.gedit.preferences.ui statusbar-visible true
+                  gsettings set org.gnome.gedit.preferences.editor display-overview-map true
+                  gsettings set org.gnome.gedit.preferences.editor auto-indent true
+
+
+                  gsettings set com.canonical.indicator.bluetooth visible false
+                  rfkill block bluetooth
+                  # rfkill unblock bluetooth
+                  gsettings set com.canonical.desktop.interface scrollbar-mode normal
+
+
+                  # Unity
+                  dconf write /org/compiz/profiles/unity/plugins/unityshell/icon-size 40
+                  dconf write /org/compiz/profiles/unity/plugins/unityshell/launcher-hide-mode 1
+                  dconf write /org/compiz/profiles/unity/plugins/unityshell/edge-responsiveness 1.3
+
+
+                  # 4 Workspaces run twice
+                  dconf write /org/compiz/profiles/unity-lowgfx/plugins/core/hsize 4
+                  dconf write /org/compiz/profiles/unity/plugins/core/hsize 4
+                  dconf write /org/compiz/profiles/unity-lowgfx/plugins/core/vsize 1
+                  dconf write /org/compiz/profiles/unity/plugins/core/vsize 1
+
+
+                  # Lock the screen delay for 3 minutes
+                  gsettings set org.gnome.desktop.session idle-delay 180
+
+
+                  # Unity online search
+                  gsettings set com.canonical.Unity.Lenses remote-content-search 'all'
+                  # gsettings set com.canonical.Unity.Lenses remote-content-search 'none'
+
+
+                  # Keyboard layouts
+                  gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'ro+std'), ('xkb', 'ru')]"
+
+
+                  # Mouse pointer speed
+                  gsettings set org.gnome.desktop.peripherals.mouse speed '-0.58676470588235297'
+
+
+                  # Sound: Allow louder than 100%
+                  gsettings set com.ubuntu.sound allow-amplified-volume true
+
+
+                  # Set timezone to Chisinau
+                  gsettings set com.canonical.indicator.datetime timezone-name 'Europe/Chisinau Chisinau'
+
+
+                  # Set changing backgrounds
+                  gsettings set org.gnome.desktop.background picture-options 'file:///usr/share/backgrounds/contest/xenial.xml'
 
                   exit'
 
