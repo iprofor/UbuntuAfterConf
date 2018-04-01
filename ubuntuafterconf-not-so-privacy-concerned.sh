@@ -513,7 +513,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # CLI Applications
                   # dkms - for enabling USB devices inside guest OS for the VirtualBox's host OS
                   # do not need anymore: clamav clamav-daemon clamav-freshclam fail2ban
-                  appcli="adobe-flashplugin apache2 apt-listchanges apt-mirror arp-scan autoconf cmus curl debconf-utils default-jdk default-jre dkms dtrx duplicity exfat-fuse exfat-utils exiftool ffmpeg git glances htop iptraf lm-sensors mc nodejs npm ntp ntpdate openssh-server p7zip p7zip-rar powerline python-pip rar rcconf redshift rig screen shellcheck sysbench sysv-rc-conf tasksel terminator testdisk tig tmux tree unace unattended-upgrades wavemon whois xclip";
+                  appcli="adobe-flashplugin apache2 apt-listchanges apt-mirror arp-scan autoconf cmus curl debconf-utils default-jdk default-jre dkms dtrx duplicity exfat-fuse exfat-utils exiftool ffmpeg git glances htop iptraf lm-sensors lxd mc nodejs npm ntp ntpdate openssh-server p7zip p7zip-rar powerline python-pip rar rcconf redshift rig screen shellcheck sysbench sysv-rc-conf tasksel terminator testdisk tig tmux tree unace unattended-upgrades wavemon whois xclip zfsutils-linux";
 
                   # GUI Applications
                   # unity-tweaktool, shutter ?????
@@ -823,7 +823,24 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # Installing Speedest-CLI
                   inst_echo Speedtest;
-                  pip install speedtest-cli --upgrade > $dn >> $rlog;
+                  pip install speedtest-cli --upgrade > $dn >> $rlog;#
+
+                  # Installing AWS-CLI
+                  inst_echo AWS-CLI;
+                  pip install awscli --upgrade > $dn >> $rlog;
+
+                  # Run as simple user
+                  # - `export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"`
+                  #
+                  # - `echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list`
+                  #
+                  # - `curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -`
+                  #
+                  # And as root
+                  # - `apt-get -y update && apt-get -y install google-cloud-sdk`
+                  #
+                  # **Optional**
+                  # - `apt-get -y install google-cloud-sdk-app-engine-python google-cloud-sdk-app-engine-java google-cloud-sdk-app-engine-go google-cloud-sdk-datalab google-cloud-sdk-datastore-emulator google-cloud-sdk-pubsub-emulator google-cloud-sdk-cbt google-cloud-sdk-bigtable-emulator kubectl`
 
                   blnk_echo;
                   up;
