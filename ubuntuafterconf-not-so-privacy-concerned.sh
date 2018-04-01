@@ -1704,6 +1704,9 @@ EOF
                   apt-get -yqq autoremove > $dn >> $rlog;
                   blnk_echo;
 
+                  # for lxd
+                  usermod --append --groups lxd $usr;
+
                   echo "Deleting temporary directory created at the beginning of this script ...";
                   cd / && rm -rf $tmpth;
                   blnk_echo;
