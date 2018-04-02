@@ -513,7 +513,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # CLI Applications
                   # dkms - for enabling USB devices inside guest OS for the VirtualBox's host OS
                   # do not need anymore: clamav clamav-daemon clamav-freshclam fail2ban
-                  # for NitroKey opensc pcscd paperkey haveged gnupg2 gnupg-agent pinentry-curses libccid scdaemon libksba8 libpth20
+                  # for NitroKey opensc pcscd paperkey haveged gnupg2 gnupg-agent pinentry-curses libccid scdaemon libksba8 libpth20 gdebi-core
                   appcli="adobe-flashplugin apache2 apt-listchanges apt-mirror arp-scan autoconf cmus curl debconf-utils default-jdk default-jre dkms dtrx duplicity exfat-fuse exfat-utils exiftool ffmpeg gdebi-core git glances gnupg-agent gnupg2 gpgsm haveged htop iptraf libccid libksba8 libpth20 lm-sensors lxd mc nodejs npm ntp ntpdate opensc opensc openssh-server p7zip p7zip-rar paperkey pcscd pinentry-curses powerline python-pip rar rcconf redshift rig scdaemon scdaemon screen shellcheck sysbench sysv-rc-conf tasksel terminator testdisk tig tmux tree unace unattended-upgrades wavemon whois xclip zfsutils-linux";
 
                   # GUI Applications
