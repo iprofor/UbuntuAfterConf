@@ -815,7 +815,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   snap install slack micro --edge --classic > /dev/null 2>&1 >> $rlog;
 
                   # snap installations
-                  snap install doctl
+                  snap install doctl lxd > $dn >> $rlog;
 
                   up;
 
@@ -1707,7 +1707,9 @@ EOF
                   blnk_echo;
 
                   # for lxd
-                  usermod --append --groups lxd $usr;
+                  usermod --append --groups lxd $usr > $dn >> $rlog;
+
+                  newgrp lxd > $dn >> $rlog;
 
                   echo "Deleting temporary directory created at the beginning of this script ...";
                   cd / && rm -rf $tmpth;
