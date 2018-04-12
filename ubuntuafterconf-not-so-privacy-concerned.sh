@@ -815,7 +815,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   snap install slack micro --edge --classic > /dev/null 2>&1 >> $rlog;
 
                   # snap installations
-                  snap install doctl lxd > $dn >> $rlog;
+                  snap install doctl lxd canonical-livepatch> $dn >> $rlog;
 
                   up;
 
