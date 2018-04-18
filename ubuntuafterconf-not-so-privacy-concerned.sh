@@ -468,7 +468,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   # "ppa:team-xbmc/ppa"
                   # "ppa:libreoffice/ppa"
-                  apprepo=("ppa:wfg/0ad" "ppa:otto-kesselgulasch/gimp" "ppa:inkscape.dev/stable" "ppa:philip5/extra" "ppa:pmjdebruijn/darktable-release" "deb https://deb.opera.com/opera-stable/ stable non-free" "deb http://download.virtualbox.org/virtualbox/debian xenial contrib" "deb https://download.sublimetext.com/ apt/stable/" "ppa:nextcloud-devs/client" "ppa:nitrokey-team/ppa" "ppa:serge-rider/dbeaver-ce" "ppa:videolan/stable-daily" "deb [arch=amd64] https://repo.skype.com/deb stable main" "ppa:andrewsomething/digitalocean");
+                  apprepo=("ppa:wfg/0ad" "ppa:otto-kesselgulasch/gimp" "ppa:inkscape.dev/stable" "ppa:philip5/extra" "ppa:pmjdebruijn/darktable-release" "deb https://deb.opera.com/opera-stable/ stable non-free" "deb http://download.virtualbox.org/virtualbox/debian xenial contrib" "deb https://download.sublimetext.com/ apt/stable/" "ppa:nextcloud-devs/client" "ppa:nitrokey-team/ppa" "ppa:serge-rider/dbeaver-ce" "ppa:videolan/stable-daily" "deb [arch=amd64] https://repo.skype.com/deb stable main" "ppa:andrewsomething/digitalocean" "deb https://packages.atlassian.com/debian/stride-apt-client $(lsb_release -c -s) main" "deb https://atlassian.artifactoryonline.com/atlassian/hipchat-apt-client $(lsb_release -c -s) main");
                   # "deb http://download.opensuse.org/repositories/home:/rawtherapee/xUbuntu_16.04/ /"
 
                   for b in "${apprepo[@]}"; do
@@ -482,7 +482,9 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # Adding external repositories keys
 
                   apprepokey=("https://deb.opera.com/archive.key" "https://www.virtualbox.org/download/oracle_vbox_2016.asc" "https://www.virtualbox.org/download/oracle_vbox.asc" "https://download.sublimetext.com/sublimehq-pub.gpg" "https://packages.microsoft.com/keys/microsoft.asc"
-                  "https://repo.skype.com/data/SKYPE-GPG-KEY");
+                  "https://repo.skype.com/data/SKYPE-GPG-KEY"
+                  "https://packages.atlassian.com/api/gpg/key/public"
+                  "https://atlassian.artifactoryonline.com/atlassian/api/gpg/key/public");
                   # "http://download.opensuse.org/repositories/home:/rawtherapee/xUbuntu_16.04/Release.key"
 
                   for c in "${apprepokey[@]}"; do
@@ -520,7 +522,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # GUI Applications
                   # unity-tweaktool, shutter ?????
                   # do not need anymore: 0ad amarok brasero clamtk gnome-control-center gnome-online-accounts gpodder gwenview kate kodi krita ktorrent yakuake digikam5 geary indicator-cpufreq k3b gpick rawtherapee
-                  appgui="aptoncd audacity bleachbit caffeine code compizconfig-settings-manager darktable dbeaver-ce deluge digitalocean-indicator easytag evolution filezilla gimp gimp-gmic gimp-plugin-registry gmic gnome-sushi glipper gnucash gparted gramps gresolver handbrake hexchat homebank indicator-multiload inkscape keepassx kmymoney mysql-workbench nautilus-actions nautilus-image-converter nextcloud-client nitrokey-app openttd pdfchain pdfshuffler pidgin redshift-gtk shutter soundconverter sound-juicer sublime-text skypeforlinux terminator uget unity-tweak-tool virtualbox-5.2 virt-viewer vlc workrave winff";
+                  appgui="aptoncd audacity bleachbit caffeine code compizconfig-settings-manager darktable dbeaver-ce deluge digitalocean-indicator easytag evolution filezilla gimp gimp-gmic gimp-plugin-registry gmic gnome-sushi glipper gnucash gparted gramps gresolver handbrake hexchat homebank indicator-multiload inkscape keepassx kmymoney mysql-workbench nautilus-actions nautilus-image-converter nextcloud-client nitrokey-app openttd pdfchain pdfshuffler pidgin redshift-gtk shutter soundconverter sound-juicer sublime-text skypeforlinux terminator uget unity-tweak-tool virtualbox-5.2 virt-viewer vlc workrave winff stride hipchat4 deluge-webui";
 
                   # The main multi-loop for installing apps/libs
                   for d in $applib $appcli $appgui; do
