@@ -798,26 +798,73 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
 
                   up;
 
-                  # Zoho Cliq
-                  dwnl_echo Cliq
-            		  curl -LO https://www.zoho.com/cliq/downloads/nativeapps/Cliq_1.1.0_amd64.deb > /dev/null 2>&1 >> $rlog;
-                  inst_echo Cliq
-                  dpkg -i Cliq_1.1.0_amd64.deb > /dev/null 2>&1 >> $rlog;
+                  # Separate installation subsection (3rd)
+
+                  sctn_echo INSTALLATION "#7";
+
+                  applnk=(
+                    # "https://www.zoho.com/cliq/downloads/nativeapps/Cliq_1.1.0_amd64.deb"
+                    "https://downloads.vivaldi.com/stable/vivaldi-stable_1.14.1077.55-1_amd64.deb"
+                    "https://update.gitter.im/linux64/gitter_3.1.0_amd64.deb"
+                    # "https://downloads.slack-edge.com/linux_releases/slack-desktop-3.1.1-amd64.deb"
+                  );
+
+                  # The applications that shows pop-ups during the their installation
+                  appnm=(
+                    # "cliq.deb"
+                    "vivaldi.deb"
+                    "gitter.deb"
+                    # "slack.deb"
+                  );
+
+                  # The loop
+                  for g2 in ${!applnk[*]}; do
+                    # dwnl_echo "${appnm[$g2]}";
+                    # echo "${applnk[$g2]}"
+                    curl -L ${applnk[*]} > ${appnm[$g2]}; #> /dev/null 2>&1 #>> $rlog;
+                    apt-get -yqqf install $PWD/${appnm[$g2]}; # > /dev/null 2>&1; #>> $rlog;
+                  done
 
                   up;
 
-                  # Vivaldi Browser
-                  vivaldi=(vivaldi-stable_1.14.1077.55-1_amd64.deb);
-                  curl -LO https://downloads.vivaldi.com/stable/$vivaldi > /dev/null 2>&1 >> $rlog;
-                  dpkg -i $vivaldi > /dev/null 2>&1 >> $rlog;
+                  # # Zoho Cliq
+                  # dwnl_echo Cliq
+            		  # curl -LO https://www.zoho.com/cliq/downloads/nativeapps/Cliq_1.1.0_amd64.deb > /dev/null 2>&1 >> $rlog;
+                  # inst_echo Cliq
+                  # dpkg -i Cliq_1.1.0_amd64.deb > /dev/null 2>&1 >> $rlog;
 
-                  up;
+
+                  # # Vivaldi Browser
+                  # vivaldi=(vivaldi-stable_1.14.1077.55-1_amd64.deb);
+                  # curl -LO https://downloads.vivaldi.com/stable/$vivaldi > /dev/null 2>&1 >> $rlog;
+                  # dpkg -i $vivaldi > /dev/null 2>&1 >> $rlog;
+
+                  # ### gitter.im
+                  # curl -LO https://update.gitter.im/linux64/gitter_3.1.0_amd64.deb
+                  # dpkg -i gitter_3.1.0_amd64.deb
+
+
+                  # ### slack
+                  # curl -LO https://downloads.slack-edge.com/linux_releases/slack-desktop-3.1.1-amd64.deb
+                  # dpkg -i slack-desktop-3.1.1-amd64.deb
+
+                  ### mattermost client
+                  curl -LO https://releases.mattermost.com/desktop/4.0.1/mattermost-desktop-4.0.1-linux-amd64.deb
+                  dpkg -i mattermost-desktop-4.0.1-linux-amd64.deb
+
+
+                  ### rocketchat
+                  curl -LO https://github.com/RocketChat/Rocket.Chat.Electron/releases/download/2.10.5/rocketchat_2.10.5_amd64.deb
+
+                  ### telegram
+                  curl -LO https://telegram.org/dl/desktop/linux
+
 
                   # micro editor
                   snap install slack micro --edge --classic > /dev/null 2>&1 >> $rlog;
 
                   # snap installations
-                  snap install doctl lxd canonical-livepatch> $dn >> $rlog;
+                  snap install doctl lxd canonical-livepatch > $dn >> $rlog;
 
                   up;
 
@@ -1211,7 +1258,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "virtualbox.desktop"
                     "zohodocs.desktop"
                     "skype.desktop"
-                    "Nextcloud.desktop"
+                    "nextcloud.desktop"
                     "megasync.desktop"
                     "dropbox.desktop"
                     "caffeine-indicator.desktop"
@@ -1220,8 +1267,8 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "hipchat.desktop"
                     "keepassx.desktop"
                     "thunderbird.desktop"
-                    "pac_start.desktop"
-                    "Launch TeamDrive.desktop"
+                    "asbru-cm_start.desktop"
+                    "teamdrive.desktop"
                     "evolution.desktop"
                     "uget-gtk.desktop"
                     "hexchat.desktop"
@@ -1229,6 +1276,10 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "deluge-gtk.desktop"
                     "remmina-applet.desktop"
                     "digitalocean-indicator-autostart.desktop"
+                    "gitter.desktop"
+                    "keepassxc.desktop"
+                    "mattermost-desktop.desktop"
+                    "stride.desktop"
                   );
 
                   # The list of the shortcuts names content
@@ -1320,7 +1371,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "[Desktop Entry]
                     Type=Application
                     Exec=skypeforlinux
-                    Hidden=false
+                    Hidden=true
                     NoDisplay=false
                     X-GNOME-Autostart-enabled=true
                     Name[en_US]=Skype for linux
@@ -1370,7 +1421,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "[Desktop Entry]
                     Type=Application
                     Exec=caffeine-indicator
-                    Hidden=false
+                    Hidden=true
                     NoDisplay=false
                     X-GNOME-Autostart-enabled=true
                     Name[en_US]=Caffeine Indicator
@@ -1381,7 +1432,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "[Desktop Entry]
                     Type=Application
                     Exec=Exec='$hm'/'$usr'/.local/share/tresorit/tresorit
-                    Hidden=false
+                    Hidden=true
                     NoDisplay=false
                     X-GNOME-Autostart-enabled=true
                     Name[en_US]=Tresorit
@@ -1393,7 +1444,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "[Desktop Entry]
                     Type=Application
                     Exec=cliq
-                    Hidden=false
+                    Hidden=true
                     NoDisplay=false
                     X-GNOME-Autostart-enabled=true
                     Name[en_US]=Zoho Cliq
@@ -1405,7 +1456,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "[Desktop Entry]
                     Type=Application
                     Exec=hipchat4
-                    Hidden=false
+                    Hidden=true
                     NoDisplay=false
                     X-GNOME-Autostart-enabled=true
                     Name[en_US]=HipChat
@@ -1417,7 +1468,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "[Desktop Entry]
                     Type=Application
                     Exec=keepassx
-                    Hidden=false
+                    Hidden=true
                     NoDisplay=false
                     X-GNOME-Autostart-enabled=true
                     Name[en_US]=KeePassX
@@ -1439,14 +1490,14 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     X-GNOME-Autostart-Delay=15"
 
                     "[Desktop Entry]
-                    Name=PAC
+                    Name=asbru-cm
                     Comment=Perl Auto Connector (auto start)
                     Terminal=false
-                    Icon=pac
+                    Icon=asbru-cm
                     Type=Application
-                    Exec=/usr/bin/pac --no-splash --iconified
+                    Exec=/usr/bin/asbru-cm --no-splash --iconified
                     StartupNotify=false
-                    Name[en_US]=PAC
+                    Name[en_US]=asbru-cm
                     Comment[en_US]=Perl Auto Connector (auto start)
                     Categories=Applications;Network;
                     X-GNOME-Autostart-enabled=true"
@@ -1532,6 +1583,47 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     Name=Digitalocean Indicator
                     Comment=Monitor your droplets
                     X-GNOME-Autostart-enabled=true"
+
+                    "[Desktop Entry]
+                    Type=Application
+                    Vestion=1.0
+                    Name=Gitter
+                    Comment=Gitter startup script
+                    Exec=/opt/Gitter/linux64/Gitter
+                    StartupNotify=false"
+
+                    "[Desktop Entry]
+                    Type=Application
+                    Exec=keepassxc
+                    Hidden=true
+                    NoDisplay=false
+                    X-GNOME-Autostart-enabled=true
+                    Name[en_US]=KeePassXC
+                    Name=KeePassXC
+                    Comment[en_US]=Autostarting at OS boot
+                    Comment=Launching KeePassXC"
+
+                    "[Desktop Entry]
+                    Type=Application
+                    Version=1.0
+                    Name=mattermost-desktop
+                    Comment=mattermost-desktopstartup script
+                    Exec=/opt/Mattermost/mattermost-desktop --hidden
+                    StartupNotify=false
+                    Terminal=false"
+
+                    "[Desktop Entry]
+                    Type=Application
+                    Exec=stride
+                    Hidden=false
+                    NoDisplay=false
+                    X-GNOME-Autostart-enabled=true
+                    Name[en_US]=stride
+                    Name=stride
+                    Comment[en_US]=Autostarting at OS boot
+                    Comment=launch stride"
+
+
 );
 
                   # There is no autostart directory, so we are going to make it
@@ -1618,7 +1710,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # gsettings set com.canonical.indicator.datetime show-year true
                   # gsettings set com.canonical.indicator.datetime timezone-name ''
 
-                  gEdit
+                  # gEdit
                   gsettings set org.gnome.gedit.preferences.editor auto-save true
                   gsettings set org.gnome.gedit.preferences.editor auto-save-interval 1
                   gsettings set org.gnome.gedit.preferences.editor create-backup-copy true
