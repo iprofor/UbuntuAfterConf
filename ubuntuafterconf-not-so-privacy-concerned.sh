@@ -3,7 +3,7 @@
 # enable some dns's
 
 # Copyright Profor Ion, contact@iprofor.it
-# 2017-08-26
+# 2017-08-26 
 
 # Inspirations sources
 
