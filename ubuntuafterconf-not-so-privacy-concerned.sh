@@ -3,7 +3,7 @@
 # enable some dns's
 
 # Copyright Profor Ion, contact@iprofor.it
-# 2017-08-26 
+# 2017-08-26
 
 # Inspirations sources
 
@@ -522,7 +522,7 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # GUI Applications
                   # unity-tweaktool, shutter ?????
                   # do not need anymore: 0ad amarok brasero clamtk gnome-control-center gnome-online-accounts gpodder gwenview kate kodi krita ktorrent yakuake digikam5 geary indicator-cpufreq k3b gpick rawtherapee
-                  appgui="aptoncd audacity bleachbit caffeine code compizconfig-settings-manager darktable dbeaver-ce deluge digitalocean-indicator easytag evolution filezilla gimp gimp-gmic gimp-plugin-registry gmic gnome-sushi glipper gnucash gparted gramps gresolver handbrake hexchat homebank indicator-multiload inkscape keepassx kmymoney mysql-workbench nautilus-actions nautilus-image-converter nextcloud-client nitrokey-app openttd pdfchain pdfshuffler pidgin redshift-gtk shutter soundconverter sound-juicer sublime-text skypeforlinux terminator uget unity-tweak-tool virtualbox-5.2 virt-viewer vlc workrave winff stride hipchat4 deluge-webui";
+                  appgui="aptoncd audacity bleachbit caffeine code compizconfig-settings-manager darktable dbeaver-ce deluge digitalocean-indicator easytag evolution filezilla gimp gimp-gmic gimp-plugin-registry gmic gnome-sushi glipper gnucash gparted gramps gresolver handbrake hexchat homebank indicator-multiload inkscape keepassx kmymoney mysql-workbench nautilus-actions nautilus-image-converter nextcloud-client nitrokey-app openttd pdfchain pdfshuffler pidgin redshift-gtk shutter soundconverter sound-juicer sublime-text skypeforlinux terminator unity-tweak-tool virtualbox-5.2 virt-viewer vlc workrave winff stride hipchat4 deluge-webui";
 
                   # The main multi-loop for installing apps/libs
                   for d in $applib $appcli $appgui; do
@@ -860,11 +860,13 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   curl -LO https://telegram.org/dl/desktop/linux
 
 
-                  # micro editor
-                  snap install slack micro --edge --classic > /dev/null 2>&1 >> $rlog;
-
                   # snap installations
+                  inst_echo doctl lxd canonical-livepatch
                   snap install doctl lxd canonical-livepatch > $dn >> $rlog;
+
+                  # Slack, Micro Editor
+                  inst_echo Slack, Micro
+                  snap install slack micro --edge --classic > /dev/null 2>&1 >> $rlog;
 
                   up;
 
@@ -952,78 +954,78 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # Telemetry
                   # Removing packages that send statisrics and usage data to Canonical and third-parties
 
-                  sctn_echo TELEMETRY;
-
-                  # Guest session disable
-                  sudo sh -c 'printf "[SeatDefaults]\nallow-guest=false\ngreeter-show-remote-login=false\n" > /etc/lightdm/lightdm.conf.d/50-no-guest.conf'
-
-                  telepack=(
-                  "unity-lens-shopping"
-                  "unity-webapps-common"
-                  # "apturl"
-                  # "remote-login-service"
-                  # "lightdm-remote-session-freerdp"
-                  # "lightdm-remote-session-uccsconfigure"
-                  # "zeitgeist"
-                  # "zeitgeist-datahub"
-                  # "zeitgeist-core"
-                  # "zeitgeist-extension-fts"
-                  "cups"
-                  "cups-server-common"
-                  # "remmina"
-                  # "remmina-common"
-                  # "remmina-plugin-rdp"
-                  # "remmina-plugin-vnc"
-                  "unity8*"
-                  "gdbserver"
-                  # "gvfs-fuse"
-                  # "evolution-data-server"
-                  # "evolution-data-server-online-accounts"
-                  # "snapd"
-                  "libhttp-daemon-perl"
-                  "vino"
-                  # "unity-scope-video-remote"
-                  )
-
-                  # Comments to each purged telepack
-                  telepack2=(
-                  "Unity Amazon"
-                  "Unity web apps"
-                  # "gives possibilities to start installation by clicking on url, can be executed with js, which is not secure"
-                  # "remote login for LightDm"
-                  # "remote login rdp for LightDm"
-                  # "remote login uccsconfigure for LightDm"
-                  # "Zeitgeist Basic Telemetry"
-                  # "Zeitgeist Basic Telemetry"
-                  # "Zeitgeist Basic Telemetry"
-                  # "Zeitgeist Basic Telemetry"
-                  "if you don't use printers"
-                  "if you don't use printers"
-                  # "has libraries for remote connection, which can be unsecure"
-                  # "has libraries for remote connection, which can be unsecure"
-                  # "has libraries for remote connection, which can be unsecure"
-                  # "has libraries for remote connection, which can be unsecure"
-                  "just remove it, because of potential telemetry from unity8, which is in beta state and exists only for preview, for now you can use 7 version. potential problem"
-                  "remote tool for gnome debug"
-                  # "virtual file system.potential problem"
-                  # "I just don't like server word here. Potentional connection possibility? potential problem"
-                  # "potential problem"
-                  # "telemetric package manager from canonical"
-                  "http server for perl"
-                  "vnc server (remote desktop share tool)"
-                  # "potential problem"
-                  )
-
-                  # The loop
-                  for h in ${!telepack[*]}; do
-                    rm_echo "${telepack[$h]}" "${telepack2[$h]}" ;
-                    apt-get -yqq purge "${telepack[$h]}" > $den1;
-                  done
-
-                  blnk_echo;
-
-
-                  # END: Telemetry section
+                  # sctn_echo TELEMETRY;
+                  #
+                  # # Guest session disable
+                  # sudo sh -c 'printf "[SeatDefaults]\nallow-guest=false\ngreeter-show-remote-login=false\n" > /etc/lightdm/lightdm.conf.d/50-no-guest.conf'
+                  #
+                  # telepack=(
+                  # "unity-lens-shopping"
+                  # "unity-webapps-common"
+                  # # "apturl"
+                  # # "remote-login-service"
+                  # # "lightdm-remote-session-freerdp"
+                  # # "lightdm-remote-session-uccsconfigure"
+                  # # "zeitgeist"
+                  # # "zeitgeist-datahub"
+                  # # "zeitgeist-core"
+                  # # "zeitgeist-extension-fts"
+                  # "cups"
+                  # "cups-server-common"
+                  # # "remmina"
+                  # # "remmina-common"
+                  # # "remmina-plugin-rdp"
+                  # # "remmina-plugin-vnc"
+                  # "unity8*"
+                  # "gdbserver"
+                  # # "gvfs-fuse"
+                  # # "evolution-data-server"
+                  # # "evolution-data-server-online-accounts"
+                  # # "snapd"
+                  # "libhttp-daemon-perl"
+                  # "vino"
+                  # # "unity-scope-video-remote"
+                  # )
+                  #
+                  # # Comments to each purged telepack
+                  # telepack2=(
+                  # "Unity Amazon"
+                  # "Unity web apps"
+                  # # "gives possibilities to start installation by clicking on url, can be executed with js, which is not secure"
+                  # # "remote login for LightDm"
+                  # # "remote login rdp for LightDm"
+                  # # "remote login uccsconfigure for LightDm"
+                  # # "Zeitgeist Basic Telemetry"
+                  # # "Zeitgeist Basic Telemetry"
+                  # # "Zeitgeist Basic Telemetry"
+                  # # "Zeitgeist Basic Telemetry"
+                  # "if you don't use printers"
+                  # "if you don't use printers"
+                  # # "has libraries for remote connection, which can be unsecure"
+                  # # "has libraries for remote connection, which can be unsecure"
+                  # # "has libraries for remote connection, which can be unsecure"
+                  # # "has libraries for remote connection, which can be unsecure"
+                  # "just remove it, because of potential telemetry from unity8, which is in beta state and exists only for preview, for now you can use 7 version. potential problem"
+                  # "remote tool for gnome debug"
+                  # # "virtual file system.potential problem"
+                  # # "I just don't like server word here. Potentional connection possibility? potential problem"
+                  # # "potential problem"
+                  # # "telemetric package manager from canonical"
+                  # "http server for perl"
+                  # "vnc server (remote desktop share tool)"
+                  # # "potential problem"
+                  # )
+                  #
+                  # # The loop
+                  # for h in ${!telepack[*]}; do
+                  #   rm_echo "${telepack[$h]}" "${telepack2[$h]}" ;
+                  #   apt-get -yqq purge "${telepack[$h]}" > $den1;
+                  # done
+                  #
+                  # blnk_echo;
+                  #
+                  #
+                  # # END: Telemetry section
 
 
                   # # ClamAV section: configuration and the first scan
@@ -1251,7 +1253,6 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                   # The list of the shortcuts names
                   appshrt=(
                     "firefox.desktop"
-                    "veracrypt.desktop"
                     "atom.desktop"
                     "redshift-gtk.desktop"
                     "rhythmbox.desktop"
@@ -1270,7 +1271,6 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     "asbru-cm_start.desktop"
                     "teamdrive.desktop"
                     "evolution.desktop"
-                    "uget-gtk.desktop"
                     "hexchat.desktop"
                     "nitrokey.desktop"
                     "deluge-gtk.desktop"
@@ -1294,18 +1294,6 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     Name=Mozilla Firefox
                     Comment[en_US]=Autostarting Firefox with the OS
                     Comment=Autostarting Firefox with the OS"
-
-                    "[Desktop Entry]
-                    Type=Application
-                    Exec=veracrypt
-                    Hidden=false
-                    NoDisplay=false
-                    X-GNOME-Autostart-enabled=true
-                    Name[en_US]=VeraCrypt
-                    Name=VeraCrypt
-                    Comment[en_US]=Autostarting VeraCrypt with the OS
-                    Comment=Autostarting VeraCrypt with the OS
-                    X-GNOME-Autostart-Delay=3"
 
                     "[Desktop Entry]
                     Type=Application
@@ -1521,17 +1509,6 @@ WantedBy=sockets.target" > /etc/systemd/system/dnscrypt-proxy.socket;
                     Name=Evolution
                     Comment[en_US]=Autostart Evolution Mail Client
                     Comment=Autostart Evolution Mail Client"
-
-                    "[Desktop Entry]
-                    Type=Application
-                    Exec=uget-gtk
-                    Hidden=false
-                    NoDisplay=false
-                    X-GNOME-Autostart-enabled=true
-                    Name[en_US]=uGet
-                    Name=uGet
-                    Comment[en_US]=Autostart uGet
-                    Comment=Autostart uGet"
 
                     "[Desktop Entry]
                     Type=Application
