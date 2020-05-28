@@ -210,7 +210,7 @@ if [[ ! $? -eq 0 ]]; then
     echo -e "Repository server: \e[1m\e[34marchive.ubuntu.com (UK)\e[0m" && blnk_echo;
 
     echo "
-    # deb cdrom:[Ubuntu 16.04.5 LTS _Xenial Xerus_ - Release amd64 (20170801)]/ xenial main restricted
+    # deb cdrom:[Ubuntu 16.04.6 LTS _Xenial Xerus_ - Release amd64 (20170801)]/ xenial main restricted
 
 # See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
 # newer versions of the distribution.
