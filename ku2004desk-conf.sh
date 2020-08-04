@@ -3,7 +3,7 @@ cd Downloads &&\
 # Prerequiesites
 
 # canonical-livepatch key
-key=(5746e6cc2e794b45ab6c5c8c4576ab07)
+key=()
 
 
 # @NOTE Ubuntu 20.04
